@@ -68,6 +68,36 @@ Ways to trigger it in Claude Code:
 
 If you invoke it without a prompt, it will ask what you're trying to get Fable 5 to do and draft one for you.
 
+## Bonus Skill: fable5-compounding
+
+The repo also ships a second skill, [`fable5-compounding/`](fable5-compounding/), for running Fable 5 as a **compounding agent system** - where every run leaves the next run smarter. It covers:
+
+- **Session discipline:** read `STATE.md` and relevant skills at session start, write state before ending
+- **The state file:** a 5-section `STATE.md` structure (verified facts, general rules, open failures, lessons, resume pointer) with a ready-to-copy [template](fable5-compounding/STATE-template.md)
+- **Independent verification:** verifier subagents with fresh context instead of self-critique, vision checks for visual output, Outcomes/rubrics in Claude Managed Agents
+- **Skills that compound:** write confirmed lessons into the skill itself, not just the chat
+- **Model routing:** orchestrator on Fable 5, bounded subtasks on Opus 4.8, bulk work on Sonnet 4.6, graders on Haiku 4.5
+- **The safety boundary:** handle `stop_reason: "refusal"` explicitly and fall back to Opus 4.8
+
+Install it the same way (note: this skill is a folder with two files):
+
+```bash
+mkdir -p .claude/skills/fable5-compounding
+curl -o .claude/skills/fable5-compounding/SKILL.md \
+  https://raw.githubusercontent.com/byhartvig/fable5-prompting/main/fable5-compounding/SKILL.md
+curl -o .claude/skills/fable5-compounding/STATE-template.md \
+  https://raw.githubusercontent.com/byhartvig/fable5-prompting/main/fable5-compounding/STATE-template.md
+```
+
+For rules you want active on **every** run (not just when the skill triggers), add this to your project's `CLAUDE.md`:
+
+```markdown
+## Session discipline
+- At session start, read STATE.md (if present) and consult its rules before re-deriving facts.
+- Before ending a session, update STATE.md: what was tried, what passed, what failed, new rules.
+- After any non-trivial failure or confirmed correction, write the lesson into the relevant skill.
+```
+
 ## What's Inside
 
 ### The 4-Component Prompt Structure
